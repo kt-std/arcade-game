@@ -5,18 +5,23 @@ const verticalStep = 83;
 const horizontalStep = 101;/*
 const initialPositionX = horizontalStep*Math.floor(numCols/2);
 const initialPositionY = 100*(numRows-2);
-*/const initialPositionX = 0;
+*/
+const initialPositionX = horizontalStep*Math.floor(numCols/2);
 const initialPositionY = (numRows-1)*(verticalStep-10);
 const canvaStart = 0;
 const CANVAS_WIDTH = 505;
 const CANVAS_HEIGHT = 600;
+
 // Enemies our player must avoid
-var Enemy = function() {
+var Enemy = function(index) {
     // Variables applied to each of our instances go here,
     // we've provided one for you to get started
 
     // The image/sprite for our enemies, this uses
     // a helper we've provided to easily load images
+    this.x = canvaStart;
+    this.speed = Math.random()*100;
+    this.y = (verticalStep-10)*index;
     this.sprite = 'images/enemy-bug.png';
 };
 
@@ -26,7 +31,37 @@ Enemy.prototype.update = function(dt) {
     // You should multiply any movement by the dt parameter
     // which will ensure the game runs at the same speed for
     // all computers.
+    if (Math.abs(player.x - this.x) < horizontalStep/2 && Math.abs(player.y - this.y) < verticalStep/2) {
+        alert('game over');
+    }
+
+    this.x = this.checkPosition(this.x + dt*this.speed);
+
+
 };
+
+document.getElementsByClassName('range')
+    .item('0').addEventListener('change', (event) => {
+        console.log(event.target.value);
+        allEnemies[0].speed = event.target.value;
+});
+document.getElementsByClassName('range')
+    .item('1').addEventListener('change', (event) => {
+        console.log(event.target.value);
+        allEnemies[1].speed = event.target.value;
+});
+document.getElementsByClassName('range')
+    .item('2').addEventListener('change', (event) => {
+        console.log(event.target.value);
+        allEnemies[2].speed = event.target.value;
+});
+
+
+Enemy.prototype.checkPosition = function(position){
+    return position > CANVAS_WIDTH + horizontalStep/2 
+      ? canvaStart - horizontalStep
+      : position;
+}
 
 // Draw the enemy on the screen, required method for game
 Enemy.prototype.render = function() {
@@ -40,8 +75,6 @@ Enemy.prototype.render = function() {
 
 // Player our player must avoid
 var Player = function() {
-    /*this.x = 101*2;
-    this.y = 101*4;*/
     this.y = initialPositionY;
     this.x = initialPositionX;
     this.sprite = 'images/char-boy.png';
@@ -50,21 +83,18 @@ var Player = function() {
 // Draw the enemy on the screen, required method for game
 Player.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
-    console.log(`Player x:${this.x} y:${this.y}`);
 };
 
 Player.prototype.update = function(dt) {
-    // You should multiply any movement by the dt parameter
-    // which will ensure the game runs at the same speed for
-    // all computers.   
-
+   
 };
 
 Player.prototype.handleInput = function(key) {
-    if (this.y >= canvaStart && this.x >= canvaStart && this.y <= initialPositionY && this.x < CANVAS_WIDTH) {
-        move(this, key);
-    }else if(this.y > initialPositionY || this.y < canvaStart){
-        this.y = initialPositionY;
+    move(this, key);
+    if(this.y < 0){
+        alert('Win!');
+    }else if(this.y > initialPositionY) {
+        this.y = initialPositionY; 
     }else if(this.x >= CANVAS_WIDTH){
         this.x = canvaStart;
     }else if(this.x < canvaStart){
@@ -72,10 +102,13 @@ Player.prototype.handleInput = function(key) {
     }
 };
 
+var allEnemies = [];
 // Now instantiate your objects.
 // Place all enemy objects in an array called allEnemies
 // Place the player object in a variable called player
-var allEnemies = [];
+for(var i = 1; i < 4; i++){
+    allEnemies.push(new Enemy(i));
+}
 var player = new Player();
 
 // This listens for key presses and sends the keys to your
@@ -87,7 +120,6 @@ document.addEventListener('keyup', function(e) {
         39: 'right',
         40: 'down'
     };
-    console.log(allowedKeys[e.keyCode]);
     player.handleInput(allowedKeys[e.keyCode]);
 });
 

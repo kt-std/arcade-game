@@ -85,6 +85,8 @@ Player.prototype.handleInput = function(key) {
         this.x = canvaStart;
     }else if(this.x < canvaStart){
         this.x = CANVAS_WIDTH - horizontalStep;
+    }else if(this.y < canvaStart){
+        this.y = canvaStart;
     }
     console.log(`x:${this.x} y:${this.y}`);
 };

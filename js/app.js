@@ -1,16 +1,16 @@
 const numRows = 6;
 const numCols = 5;
-const rowHeight = 83;
-const verticalStep = 83;
-const horizontalStep = 101;/*
+const rowHeight = 60;
+const verticalStep = 60;
+const horizontalStep = 70;/*
 const initialPositionX = horizontalStep*Math.floor(numCols/2);
 const initialPositionY = 100*(numRows-2);
 */
 const initialPositionX = horizontalStep*Math.floor(numCols/2);
-const initialPositionY = (numRows-1)*(verticalStep-10);
+const initialPositionY = (numRows-1)*verticalStep;
 const canvaStart = 0;
-const CANVAS_WIDTH = 505;
-const CANVAS_HEIGHT = 600;
+const CANVAS_WIDTH = numCols*horizontalStep;
+const CANVAS_HEIGHT = numRows*horizontalStep;
 
 // Enemies our player must avoid
 var Enemy = function(index) {
@@ -21,8 +21,8 @@ var Enemy = function(index) {
     // a helper we've provided to easily load images
     this.x = canvaStart;
     this.speed = Math.random()*100;
-    this.y = (verticalStep-10)*index;
-    this.sprite = 'images/enemy-bug.png';
+    this.y = verticalStep*(index);
+    this.sprite = 'images/yeti.png';
 };
 
 // Update the enemy's position, required method for game
@@ -34,27 +34,11 @@ Enemy.prototype.update = function(dt) {
     if (Math.abs(player.x - this.x) < horizontalStep/2 && Math.abs(player.y - this.y) < verticalStep/2) {
         alert('game over');
     }
-
+    this.speed += 0.05; 
     this.x = this.checkPosition(this.x + dt*this.speed);
 
 
 };
-
-document.getElementsByClassName('range')
-    .item('0').addEventListener('change', (event) => {
-        console.log(event.target.value);
-        allEnemies[0].speed = event.target.value;
-});
-document.getElementsByClassName('range')
-    .item('1').addEventListener('change', (event) => {
-        console.log(event.target.value);
-        allEnemies[1].speed = event.target.value;
-});
-document.getElementsByClassName('range')
-    .item('2').addEventListener('change', (event) => {
-        console.log(event.target.value);
-        allEnemies[2].speed = event.target.value;
-});
 
 
 Enemy.prototype.checkPosition = function(position){
@@ -77,7 +61,7 @@ Enemy.prototype.render = function() {
 var Player = function() {
     this.y = initialPositionY;
     this.x = initialPositionX;
-    this.sprite = 'images/char-boy.png';
+    this.sprite = 'images/santa.png';
 };
 
 // Draw the enemy on the screen, required method for game
@@ -90,8 +74,9 @@ Player.prototype.update = function(dt) {
 };
 
 Player.prototype.handleInput = function(key) {
+
     move(this, key);
-    if(this.y < 0){
+    if(!this.y){
         alert('Win!');
     }else if(this.y > initialPositionY) {
         this.y = initialPositionY; 
@@ -100,6 +85,7 @@ Player.prototype.handleInput = function(key) {
     }else if(this.x < canvaStart){
         this.x = CANVAS_WIDTH - horizontalStep;
     }
+    console.log(`x:${this.x} y:${this.y}`);
 };
 
 var allEnemies = [];

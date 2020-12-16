@@ -16,7 +16,21 @@ const allEnemies = [],
       RANDOM_BASE = 100,
       SPEED_INC = 0.01,
       X_GAP = X_STEP/2,
-      Y_GAP = Y_STEP/2;
+      Y_GAP = Y_STEP/2,
+      messages = {
+        win:{
+            text:`You've just successfully saved Xmas!`,
+            path: `images/bell.svg`,
+            button: `Play again!`,
+            heading:`Congrats!`
+        },
+        lose:{
+            text:``,
+            path: `images/bell.svg`,
+            button: `Try again!`,
+            heading:`You lose \u26C4`
+        }
+      };
 
 
 const Enemy = function(index) {
@@ -76,7 +90,7 @@ Player.prototype.render = function() {
  */
 Player.prototype.update = function() {
     if(!this.lives){
-        displayMessage('lose', 'flex');
+        displayMessage('lose', 'flex', messages);
     }else{
         allEnemies.forEach(enemy => {
             if (Math.abs(this.x - enemy.x) < X_GAP && 
@@ -107,7 +121,7 @@ Player.prototype.resetLives = function (livesAmount){
 Player.prototype.handleInput = function(key) {
     this.move(key);
     if(!this.y){
-        displayMessage('win', 'flex');
+        displayMessage('win', 'flex', messages);
     }else if(this.y > INITIAL_Y) {
         this.y = INITIAL_Y; 
     }else if(this.x >= CANVAS_WIDTH){
@@ -157,7 +171,7 @@ document.addEventListener('keyup', function(e) {
  */
 document.querySelector('body').addEventListener('click', function(e){
     if (e.target.id === 'reset') {
-        displayMessage(e.target.offsetParent.id, 'none');        
+        document.getElementById(e.target.offsetParent.id).remove();        
         resetPosition(player, INITIAL_X, INITIAL_Y);
         player.resetLives(LIVES_AMOUNT);
         allEnemies.map((enemy,index) =>{
@@ -206,10 +220,41 @@ function clearLivesContainer(){
     }
 }
 
-function displayMessage(id, displayStyle){
-    document.getElementById(id).style.display = displayStyle;
-  /*  const fragment = document.createDocumentFragment();
-    fragment.appendChild('div');*/
+function displayMessage(id, displayStyle, messages){
+    if(document.getElementById(id) === null){
+        createMessageBlock(id, displayStyle, messages);
+    }
+    else{
+        document.getElementById(id).style.display = displayStyle;
+    }
+}
+
+function createMessageBlock(id, displayStyle, messages){
+    const fragment = document.createDocumentFragment(),
+          div = document.createElement('div'),
+          h1 = document.createElement('h1'),
+          p = document.createElement('p'),
+          button = document.createElement('button'),
+          span = document.createElement('span'),
+          img = document.createElement('img');
+    div.id = id;
+    span.id = `reset`;
+    img.src = messages[id].path;
+    img.classList.add('message__border');
+    div.classList.add(`${id}`, 'message');
+    h1.classList.add('message__header');
+    p.classList.add('message__text');
+    button.classList.add('reset-btn');
+    span.classList.add('reset-btn__box');
+    span.innerText = messages[id].button;
+    h1.innerText = messages[id].heading;
+    p.innerHTML = messages[id].text;
+    button.appendChild(span);
+
+    [img, h1, p, button].forEach(el => fragment.appendChild(el));
+    div.appendChild(fragment);
+    div.style.display = displayStyle;
+    document.body.appendChild(div);
 }
 
 const player = new Player();
@@ -218,12 +263,3 @@ for(let i = 0; i < ENEMIES_AMOUNT; i++){
     allEnemies.push(new Enemy(i+1));
 }
 
-/*
-<div id="win" class="win message">
-            <img src="images/bell.svg" class="message__border">
-            <h1 class="message__header">Congrats!</h1>
-            <p class="message__text">You've just successfully saved Xmas!</p>
-            <button id="reset" class="reset-btn">
-                <span class="reset-btn__box" id="reset">Play again!</span>
-            </button>
-        </div>*/

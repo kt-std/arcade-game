@@ -46,6 +46,7 @@ var Engine = (function(global) {
          */
         update(dt);
         render();
+        appendLivesToContainer(player.lives);
 
         /* Set our lastTime variable which is used to determine the time delta
          * for the next time this function is called.
@@ -107,12 +108,12 @@ var Engine = (function(global) {
          * for that particular row of the game level.
          */
         var rowImages = [
-                'images/water-block.png',   // Top row is water
-                'images/stone-block.png',   // Row 1 of 3 of stone
-                'images/stone-block.png',   // Row 2 of 3 of stone
-                'images/stone-block.png',   // Row 3 of 3 of stone
-                'images/grass-block.png',   // Row 1 of 2 of grass
-                'images/grass-block.png'    // Row 2 of 2 of grass
+                'images/tundraR.png',   // Top row is water
+                'images/riverR.png',   // Row 1 of 3 of stone
+                'images/riverR.png',   // Row 2 of 3 of stone
+                'images/riverR.png',   // Row 2 of 3 of stone
+                'images/snowDR.png',   // Row 1 of 2 of grass
+                'images/snowDR.png'    // Row 2 of 2 of grass
             ],
             row, col;
 
@@ -123,9 +124,8 @@ var Engine = (function(global) {
          * and, using the rowImages array, draw the correct image for that
          * portion of the "grid"
          */
-         ctx.fillRect(0,0, 10, 10);
-        for (row = 0; row < numRows; row++) {
-            for (col = 0; col < numCols; col++) {
+        for (row = 0; row < ROW_NUM; row++) {
+            for (col = 0; col < COL_NUM; col++) {
                 /* The drawImage function of the canvas' context element
                  * requires 3 parameters: the image to draw, the x coordinate
                  * to start drawing and the y coordinate to start drawing.
@@ -133,7 +133,7 @@ var Engine = (function(global) {
                  * so that we get the benefits of caching these images, since
                  * we're using them over and over.
                  */
-                ctx.drawImage(Resources.get(rowImages[row]), col * 101, row * 83);
+                ctx.drawImage(Resources.get(rowImages[row]), col * 70, row * ROW_HEIGHT);
             }
         }
 
@@ -168,11 +168,11 @@ var Engine = (function(global) {
      * all of these images are properly loaded our game will start.
      */
     Resources.load([
-        'images/stone-block.png',
-        'images/water-block.png',
-        'images/grass-block.png',
-        'images/enemy-bug.png',
-        'images/char-boy.png'
+        'images/tundraR.png',
+        'images/riverR.png',   
+        'images/snowDR.png',
+        'images/santa.png',
+        'images/yeti.png'
     ]);
     Resources.onReady(init);
 

@@ -1,18 +1,20 @@
-const numRows = 6;
-const numCols = 7;
-const rowHeight = 70;
-const verticalStep = 70;
-const amountOfLives = 3;
 let allEnemies = [];
-const horizontalStep = 70;
-const initialPositionX = horizontalStep*Math.floor(numCols/2);
-const initialPositionY = (numRows-1)*verticalStep;
-const canvaStart = 0;
-const CANVAS_WIDTH = numCols*horizontalStep;
-const CANVAS_HEIGHT = numRows*horizontalStep+20;
-const heartPath = 'images/heart.svg';
-const randomSpeedSeed = 100;
-const speedIncrement = 0.01;
+const numRows = 6;
+      numCols = 7,
+      rowHeight = 70,
+      verticalStep = 70,
+      horizontalStep = 70,
+      initialPositionX = horizontalStep*Math.floor(numCols/2),
+      initialPositionY = (numRows-1)*verticalStep,
+      canvaStart = 0,
+      CANVAS_WIDTH = numCols*horizontalStep,
+      CANVAS_HEIGHT = numRows*horizontalStep+20,
+      amountOfLives = 3,
+      heartSpritePath = 'images/heart.svg',
+      randomSpeedSeed = 100,
+      speedIncrement = 0.01,
+      horizotalVisibilityArea = horizontalStep/2,
+      verticalVisibilityArea = verticalStep/2;
 
 var Enemy = function(index) {
     this.x = canvaStart;
@@ -22,22 +24,31 @@ var Enemy = function(index) {
 };
 
 
-Enemy.prototype.update = function(dt) {
-    this.speed += speedIncrement; 
-    this.x = this.checkPosition(this.x + dt*this.speed); 
-};
-
-
-Enemy.prototype.checkPosition = function(position){
-    return position > CANVAS_WIDTH + horizontalStep/2 
-      ? canvaStart - horizontalStep
-      : position;
-}
-
-
+/* This function displays each Enemy instance sprite on the canvas
+ * due to its current X and Y coodinates
+ */
 Enemy.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 };
+
+
+Enemy.prototype.update = function(dt) {
+    // Speed up the enemy during the game
+    this.speed += speedIncrement; 
+    // Update Enemy's horizontal position
+    this.x = this.updateHorizontalPosition(this.x + dt*this.speed); 
+};
+
+
+Enemy.prototype.updateHorizontalPosition = function(position){
+    /* If the Enemy moves right off the visible canvas area 
+     * place it back to the beginning of the row in other cases 
+     * move right
+     */
+    return position > CANVAS_WIDTH + horizotalVisibilityArea 
+      ? canvaStart - horizotalVisibilityArea
+      : position;
+}
 
 
 var Player = function() {
@@ -57,8 +68,8 @@ Player.prototype.update = function() {
         displayMessage('lose', 'flex');
     }else{
         allEnemies.forEach(enemy =>{
-            if (Math.abs(player.x - enemy.x) < horizontalStep/2 && 
-                Math.abs(player.y - enemy.y) < verticalStep/2) {
+            if (Math.abs(player.x - enemy.x) < horizotalVisibilityArea && 
+                Math.abs(player.y - enemy.y) < verticalVisibilityArea) {
                 player.lives.pop();
                 updateLives(player.lives);
                 resetPosition(player, initialPositionX, initialPositionY);
@@ -163,7 +174,7 @@ function appendLives(livesArray){
     }
     for (var i = 0; i < livesArray.length; i++) {
         const img = document.createElement('img');
-        img.src = heartPath;
+        img.src = heartSpritePath;
         img.classList.add('hearts__image');
         fragment.appendChild(img);
     }
@@ -182,5 +193,3 @@ function updateLives(livesArray){
     const fragment = document.getElementById('hearts');
     fragment.removeChild(fragment.lastChild);
 }
-
-appendLives(player.lives);

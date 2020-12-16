@@ -10,29 +10,23 @@ const initialPositionY = (numRows-1)*verticalStep;
 const canvaStart = 0;
 const CANVAS_WIDTH = numCols*horizontalStep;
 const CANVAS_HEIGHT = numRows*horizontalStep+20;
-const heartPath = 'images/heart.png';
-
+const heartPath = 'images/heart.svg';
+const randomSpeedSeed = 100;
+const speedIncrement = 0.01;
 
 var Enemy = function(index) {
     this.x = canvaStart;
-    this.speed = Math.random()*100;
-    this.y = verticalStep*(index);
+    this.y = verticalStep*(index);    
+    this.speed = Math.random()*randomSpeedSeed;
     this.sprite = 'images/yeti.png';
 };
 
 
 Enemy.prototype.update = function(dt) {
-    if(!haveLives(player.lives)){
-        displayMessage('lose', 'flex');
-    }else{
-        this.speed += 0.01; 
-        this.x = this.checkPosition(this.x + dt*this.speed); 
-    }
+    this.speed += speedIncrement; 
+    this.x = this.checkPosition(this.x + dt*this.speed); 
 };
 
-var Lives = function(){
-    this.sprite = 'images/heart.png';
-}
 
 Enemy.prototype.checkPosition = function(position){
     return position > CANVAS_WIDTH + horizontalStep/2 
@@ -59,22 +53,23 @@ Player.prototype.render = function() {
 };
 
 Player.prototype.update = function() {
-    allEnemies.forEach(enemy =>{
-        if (Math.abs(player.x - enemy.x) < horizontalStep/2 && 
-            Math.abs(player.y - enemy.y) < verticalStep/2) {
-
-            player.lives.pop();
-            updateLives(player.lives);
-            resetPosition(player, initialPositionX, initialPositionY);
-            console.log(player.lives);
-        }
-    });
+    if(!haveLives(player.lives)){
+        displayMessage('lose', 'flex');
+    }else{
+        allEnemies.forEach(enemy =>{
+            if (Math.abs(player.x - enemy.x) < horizontalStep/2 && 
+                Math.abs(player.y - enemy.y) < verticalStep/2) {
+                player.lives.pop();
+                updateLives(player.lives);
+                resetPosition(player, initialPositionX, initialPositionY);
+            }
+        });
+    }
    
 };
 
 
 Player.prototype.handleInput = function(key) {
-    console.log(this.lives);
     move(this, key);
     if(!this.y){
         displayMessage('win', 'flex');
@@ -86,10 +81,7 @@ Player.prototype.handleInput = function(key) {
         this.x = CANVAS_WIDTH - horizontalStep;
     }else if(this.y < canvaStart){
         this.y = canvaStart;
-    }
-    console.log(`x:${this.x} y:${this.y}`);  
-    
-    
+    }    
 };
 
 
@@ -137,8 +129,7 @@ function displayMessage(id, displayStyle){
 document.querySelector('body').addEventListener('click', function(e){
     console.log(e.target);
     if (e.target.id === 'reset') {
-        displayMessage(e.target.offsetParent.id, 'none');
-        
+        displayMessage(e.target.offsetParent.id, 'none');        
         resetPosition(player, initialPositionX, initialPositionY);
         resetLives(player, amountOfLives);
         allEnemies.map((enemy,index) =>{
@@ -161,19 +152,35 @@ function haveLives(livesArray){
 
 function resetLives(obj, amountOfLives){
     obj.lives = new Array(amountOfLives);
+    appendLives(obj.lives);
 }
 
-function updateLives(livesArray){
+function appendLives(livesArray){
+    const heartsContainer = document.getElementById('hearts');
     const fragment = document.createDocumentFragment();
-    const img = document.createElement('img');
-
+    if(heartsContainer.children.length){
+        clearNodes(heartsContainer);
+    }
     for (var i = 0; i < livesArray.length; i++) {
+        const img = document.createElement('img');
         img.src = heartPath;
-        img.style.height = '25px'; 
+        img.classList.add('hearts__image');
         fragment.appendChild(img);
     }
     document.getElementById('hearts').appendChild(fragment);
+    
 
 }
 
-updateLives(player.lives);
+function clearNodes(node){
+    while (node.firstChild) {
+        node.removeChild(node.lastChild);
+    }
+}
+
+function updateLives(livesArray){
+    const fragment = document.getElementById('hearts');
+    fragment.removeChild(fragment.lastChild);
+}
+
+appendLives(player.lives);

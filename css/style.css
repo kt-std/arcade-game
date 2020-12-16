@@ -86,5 +86,9 @@ canvas{
 .message__header {
 	font-family: 'Lobster Two', cursive;
 }
-.message__text {
+.hearts__image:not(:last-of-type){
+	margin-right: 20px;
+}
+.hearts__image,.hearts{
+	height: 25px;
 }

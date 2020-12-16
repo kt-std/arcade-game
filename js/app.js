@@ -1,7 +1,7 @@
 const numRows = 6;
-const numCols = 5;
-const rowHeight = 60;
-const verticalStep = 60;
+const numCols = 7;
+const rowHeight = 70;
+const verticalStep = 70;
 const horizontalStep = 70;/*
 const initialPositionX = horizontalStep*Math.floor(numCols/2);
 const initialPositionY = 100*(numRows-2);
@@ -10,7 +10,7 @@ const initialPositionX = horizontalStep*Math.floor(numCols/2);
 const initialPositionY = (numRows-1)*verticalStep;
 const canvaStart = 0;
 const CANVAS_WIDTH = numCols*horizontalStep;
-const CANVAS_HEIGHT = numRows*horizontalStep;
+const CANVAS_HEIGHT = numRows*horizontalStep+20;
 
 // Enemies our player must avoid
 var Enemy = function(index) {
@@ -32,11 +32,11 @@ Enemy.prototype.update = function(dt) {
     // which will ensure the game runs at the same speed for
     // all computers.
     if (Math.abs(player.x - this.x) < horizontalStep/2 && Math.abs(player.y - this.y) < verticalStep/2) {
-        alert('game over');
+        displayMessage('lose', 'flex');
+    }else{
+        this.speed += 0.01; 
+        this.x = this.checkPosition(this.x + dt*this.speed);
     }
-    this.speed += 0.05; 
-    this.x = this.checkPosition(this.x + dt*this.speed);
-
 
 };
 
@@ -73,11 +73,12 @@ Player.prototype.update = function(dt) {
    
 };
 
+
 Player.prototype.handleInput = function(key) {
 
     move(this, key);
     if(!this.y){
-        alert('Win!');
+        displayMessage('win', 'flex');
     }else if(this.y > initialPositionY) {
         this.y = initialPositionY; 
     }else if(this.x >= CANVAS_WIDTH){
@@ -124,4 +125,30 @@ function move(obj, key){
             obj.x += horizontalStep;
             break;
     }
+}
+
+function displayMessage(id, displayStyle){
+    document.getElementById(id).style.display = displayStyle;
+}
+
+/*
+ *Handle reset button event
+ */
+document.querySelector('body').addEventListener('click', function(e){
+    console.log(e.target);
+    if (e.target.id === 'reset') {
+        displayMessage(e.target.offsetParent.id, 'none');
+        
+        resetPosition(player, initialPositionX, initialPositionY);
+        allEnemies.map((enemy,index) =>{
+            resetPosition(enemy, canvaStart, verticalStep*(index+1));
+            enemy.speed = Math.random()*100;
+        });
+    }
+});
+
+ 
+function resetPosition(object, positionX, positionY){
+    object.x = positionX;
+    object.y = positionY;
 }

@@ -107,12 +107,12 @@ var Engine = (function(global) {
          * for that particular row of the game level.
          */
         var rowImages = [
-                'images/tundraFinish.png',   // Top row is water
-                'images/river.png',   // Row 1 of 3 of stone
-                'images/river.png',   // Row 2 of 3 of stone
-                'images/river.png',   // Row 2 of 3 of stone
-                'images/snow.png',   // Row 1 of 2 of grass
-                'images/snow.png'    // Row 2 of 2 of grass
+                'images/tundraR.png',   // Top row is water
+                'images/riverR.png',   // Row 1 of 3 of stone
+                'images/riverR.png',   // Row 2 of 3 of stone
+                'images/riverR.png',   // Row 2 of 3 of stone
+                'images/snowDR.png',   // Row 1 of 2 of grass
+                'images/snowDR.png'    // Row 2 of 2 of grass
             ],
             row, col;
 
@@ -167,9 +167,9 @@ var Engine = (function(global) {
      * all of these images are properly loaded our game will start.
      */
     Resources.load([
-        'images/tundraFinish.png',
-        'images/river.png',   
-        'images/snow.png',
+        'images/tundraR.png',
+        'images/riverR.png',   
+        'images/snowDR.png',
         'images/santa.png',
         'images/yeti.png'
     ]);

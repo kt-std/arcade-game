@@ -1,3 +1,89 @@
+*{
+	margin: 0;
+	padding: 0;
+	outline: none;
+	border: none;
+}
 body {
-    text-align: center;
+    text-align: center;    
+    width: 100%;
+    line-height: 1.2;
+    min-height: 100vh;
+    font-family: 'Andika New Basic', sans-serif;
+    overflow: hidden;    
+	cursor:auto;
+	cursor: url(../images/cursor_auto.png) 0 0, auto;    
+}
+canvas{
+	border:inset 1px transparent;
+	border-radius: 30px;
+}
+.flex{
+	display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.container{
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	z-index: 1;
+	top: 0;
+	left: 0;
+	background-color: white;
+}
+.message{
+	border-radius: 30px;
+	position: absolute;
+	display: none;
+	align-items: center;
+	align-content: center;
+	justify-content: space-between;
+	flex-direction: column;
+	width: 300px;
+	transform: translate(-50%, -50%);
+	top: 50%;
+	left: 50%;
+	z-index: 40;
+	background-color: #b71c1c;
+	min-height: 250px;
+	color: white;
+}
+.reset-btn::-moz-focus-inner {
+ 	border: 0;
+}
+.reset-btn{
+	background-color: black;
+	width: 100%;
+	margin: 40px 0;
+	cursor:pointer;
+	box-sizing: border-box;
+	border:none;
+	padding: 10px;
+	cursor: url(../images/cursor_1.png) 2 2, pointer;
+}
+.reset-btn__box{
+	background-color: #FFB300;
+	padding: 20px;
+	transition: 0.5s;
+	border-radius: 10px;
+	font-family: 'Andika New Basic', sans-serif;
+	font-weight: 600;
+}
+.reset-btn__box:hover{
+	color: #FF5722;
+	box-shadow: 0 0 5px orange;
+}
+
+.message__border {
+	position: relative;
+	height: 80px;
+	top: -50px;
+	width: 200px;
+
+}
+.message__header {
+	font-family: 'Lobster Two', cursive;
+}
+.message__text {
 }

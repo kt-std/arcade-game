@@ -10,7 +10,8 @@ const allEnemies = [],
       CANVAS_WIDTH = COL_NUM*X_STEP,
       CANVAS_HEIGHT = ROW_NUM*X_STEP+20,
       LIVES_AMOUNT = 3,
-      HEART_SPRITE = 'images/heart.svg',
+      LIVE_SPRITE = 'images/heart.svg',
+      LIVES_CONTAINER = document.getElementById('hearts'),
       RANDOM_BASE = 100,
       SPEED_INC = 0.01,
       X_GAP = X_STEP/2,
@@ -54,7 +55,7 @@ Enemy.prototype.updateHorizontalPosition = function(position){
 var Player = function() {
     this.y = INITIAL_Y;
     this.x = INITIAL_X;
-    this.lives = new Array(LIVES_AMOUNT);
+    this.lives = LIVES_AMOUNT;
     this.sprite = 'images/santa.png';
 };
 
@@ -64,24 +65,40 @@ Player.prototype.render = function() {
 };
 
 Player.prototype.update = function() {
-    if(!haveLives(player.lives)){
+    if(!this.lives){
         displayMessage('lose', 'flex');
     }else{
-        allEnemies.forEach(enemy =>{
-            if (Math.abs(player.x - enemy.x) < X_GAP && 
-                Math.abs(player.y - enemy.y) < Y_GAP) {
-                player.lives.pop();
-                updateLives(player.lives);
-                resetPosition(player, INITIAL_X, INITIAL_Y);
+        allEnemies.forEach(enemy => {
+            if (Math.abs(this.x - enemy.x) < X_GAP && 
+                Math.abs(this.y - enemy.y) < Y_GAP) {
+                this.lives--;
+                updateLivesContainer();
+                resetPosition(this, INITIAL_X, INITIAL_Y);
             }
         });
-    }
-   
+    }   
 };
 
 
+Player.prototype.move = function (key){
+    switch(key){
+        case 'up':
+            this.y -= Y_STEP;
+            break;    
+        case 'down':
+            this.y += Y_STEP;
+            break; 
+        case 'left':
+            this.x -= X_STEP;
+            break;
+        case 'right':
+            this.x += X_STEP;
+            break;
+    }
+}
+
 Player.prototype.handleInput = function(key) {
-    move(this, key);
+    this.move(key);
     if(!this.y){
         displayMessage('win', 'flex');
     }else if(this.y > INITIAL_Y) {
@@ -96,15 +113,14 @@ Player.prototype.handleInput = function(key) {
 };
 
 
-for(var i = 0; i < 3; i++){
+for(let i = 0; i < 3; i++){
     allEnemies.push(new Enemy(i+1));
 }
-var player = new Player();
+const player = new Player();
 
 // This listens for key presses and sends the keys to your
-// Player.handleInput() method. You don't need to modify this.
 document.addEventListener('keyup', function(e) {
-    var allowedKeys = {
+    const allowedKeys = {
         37: 'left',
         38: 'up',
         39: 'right',
@@ -113,36 +129,25 @@ document.addEventListener('keyup', function(e) {
     player.handleInput(allowedKeys[e.keyCode]);
 });
 
-function move(obj, key){
-    switch(key){
-        case 'up':
-            obj.y -= Y_STEP;
-            break;    
-        case 'down':
-            obj.y += Y_STEP;
-            break; 
-        case 'left':
-            obj.x -= X_STEP;
-            break;
-        case 'right':
-            obj.x += X_STEP;
-            break;
-    }
-}
 
 function displayMessage(id, displayStyle){
     document.getElementById(id).style.display = displayStyle;
 }
 
+Player.prototype.resetLives = function (livesAmount){
+    this.lives = livesAmount;
+    appendLivesToContainer(this.lives);
+}
+
+
 /*
  *Handle reset button event
  */
 document.querySelector('body').addEventListener('click', function(e){
-    console.log(e.target);
     if (e.target.id === 'reset') {
         displayMessage(e.target.offsetParent.id, 'none');        
         resetPosition(player, INITIAL_X, INITIAL_Y);
-        resetLives(player, LIVES_AMOUNT);
+        player.resetLives(LIVES_AMOUNT);
         allEnemies.map((enemy,index) =>{
             resetPosition(enemy, CANVAS_START, Y_STEP*(index+1));
             enemy.speed = Math.random()*100;
@@ -156,31 +161,19 @@ function resetPosition(object, positionX, positionY){
     object.y = positionY;
 }
 
-function haveLives(livesArray){
-    return livesArray.length;
-}
 
-
-function resetLives(obj, LIVES_AMOUNT){
-    obj.lives = new Array(LIVES_AMOUNT);
-    appendLives(obj.lives);
-}
-
-function appendLives(livesArray){
-    const heartsContainer = document.getElementById('hearts');
+function appendLivesToContainer(livesAmount){
     const fragment = document.createDocumentFragment();
-    if(heartsContainer.children.length){
-        clearNodes(heartsContainer);
+    if(LIVES_CONTAINER.children.length){
+        clearNodes(LIVES_CONTAINER);
     }
-    for (var i = 0; i < livesArray.length; i++) {
+    for (let i = 0; i < livesAmount; i++) {
         const img = document.createElement('img');
-        img.src = HEART_SPRITE;
+        img.src = LIVE_SPRITE;
         img.classList.add('hearts__image');
         fragment.appendChild(img);
     }
-    document.getElementById('hearts').appendChild(fragment);
-    
-
+    LIVES_CONTAINER.appendChild(fragment);
 }
 
 function clearNodes(node){
@@ -189,7 +182,6 @@ function clearNodes(node){
     }
 }
 
-function updateLives(livesArray){
-    const fragment = document.getElementById('hearts');
-    fragment.removeChild(fragment.lastChild);
+function updateLivesContainer(){
+    LIVES_CONTAINER.removeChild(LIVES_CONTAINER.lastChild);
 }

@@ -46,7 +46,7 @@ var Engine = (function(global) {
          */
         update(dt);
         render();
-        appendLives(player.lives);
+        appendLivesToContainer(player.lives);
 
         /* Set our lastTime variable which is used to determine the time delta
          * for the next time this function is called.

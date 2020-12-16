@@ -1,4 +1,5 @@
 const allEnemies = [],
+      ENEMIES_AMOUNT = 3,
       ROW_NUM = 6;
       COL_NUM = 7,
       ROW_HEIGHT = 70,
@@ -17,7 +18,8 @@ const allEnemies = [],
       X_GAP = X_STEP/2,
       Y_GAP = Y_STEP/2;
 
-var Enemy = function(index) {
+
+const Enemy = function(index) {
     this.x = CANVAS_START;
     this.y = Y_STEP*(index);    
     this.speed = Math.random()*RANDOM_BASE;
@@ -51,8 +53,7 @@ Enemy.prototype.updateHorizontalPosition = function(position){
       : position;
 }
 
-
-var Player = function() {
+const Player = function() {
     this.y = INITIAL_Y;
     this.x = INITIAL_X;
     this.lives = LIVES_AMOUNT;
@@ -60,10 +61,19 @@ var Player = function() {
 };
 
 
+/* This function displays Player sprite on the canvas
+ * due to its current X and Y coodinates
+ */
 Player.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 };
 
+/* This function checks if there are left any Player lives.  
+ * If there remain no lives, display a loss message. 
+ * If Player still left lives and it has crossed the border of any Enemy, 
+ * then decrease Player lives amount, delete live item from the LIVES_CONTAINER 
+ * and reset Player position to the initial state.
+ */
 Player.prototype.update = function() {
     if(!this.lives){
         displayMessage('lose', 'flex');
@@ -72,14 +82,47 @@ Player.prototype.update = function() {
             if (Math.abs(this.x - enemy.x) < X_GAP && 
                 Math.abs(this.y - enemy.y) < Y_GAP) {
                 this.lives--;
-                updateLivesContainer();
+                removeLivesFromContainer();
                 resetPosition(this, INITIAL_X, INITIAL_Y);
             }
         });
     }   
 };
 
+/* This function resets Player lives to the initial state
+ * and calls the function to append lives to the LIVES_CONTAINER 
+ */
+Player.prototype.resetLives = function (livesAmount){
+    this.lives = livesAmount;
+    appendLivesToContainer(this.lives);
+}
 
+
+/* This function handles user input and moves Player to the  
+ * special position depending on condition. If user reached the first(finish) row
+ * it displays greeting message. If Player reached the left/right canvas edge it 
+ * transfers Player to the oposite canvas side. If Player reached canvas bottom it 
+ * remains on its place.
+ */
+Player.prototype.handleInput = function(key) {
+    this.move(key);
+    if(!this.y){
+        displayMessage('win', 'flex');
+    }else if(this.y > INITIAL_Y) {
+        this.y = INITIAL_Y; 
+    }else if(this.x >= CANVAS_WIDTH){
+        this.x = CANVAS_START;
+    }else if(this.x < CANVAS_START){
+        this.x = CANVAS_WIDTH - X_STEP;
+    }else if(this.y < CANVAS_START){
+        this.y = CANVAS_START;
+    }    
+};
+
+
+/*
+ * This function sets Player coordinate depending on the key pressed 
+ */
 Player.prototype.move = function (key){
     switch(key){
         case 'up':
@@ -97,28 +140,6 @@ Player.prototype.move = function (key){
     }
 }
 
-Player.prototype.handleInput = function(key) {
-    this.move(key);
-    if(!this.y){
-        displayMessage('win', 'flex');
-    }else if(this.y > INITIAL_Y) {
-        this.y = INITIAL_Y; 
-    }else if(this.x >= CANVAS_WIDTH){
-        this.x = CANVAS_START;
-    }else if(this.x < CANVAS_START){
-        this.x = CANVAS_WIDTH - X_STEP;
-    }else if(this.y < CANVAS_START){
-        this.y = CANVAS_START;
-    }    
-};
-
-
-for(let i = 0; i < 3; i++){
-    allEnemies.push(new Enemy(i+1));
-}
-const player = new Player();
-
-// This listens for key presses and sends the keys to your
 document.addEventListener('keyup', function(e) {
     const allowedKeys = {
         37: 'left',
@@ -130,18 +151,9 @@ document.addEventListener('keyup', function(e) {
 });
 
 
-function displayMessage(id, displayStyle){
-    document.getElementById(id).style.display = displayStyle;
-}
-
-Player.prototype.resetLives = function (livesAmount){
-    this.lives = livesAmount;
-    appendLivesToContainer(this.lives);
-}
-
-
 /*
- *Handle reset button event
+ * This function resets Player and Enemies position, Player's lives 
+ * and Enemies speed to restart the game if the reset button is pressed
  */
 document.querySelector('body').addEventListener('click', function(e){
     if (e.target.id === 'reset') {
@@ -155,17 +167,19 @@ document.querySelector('body').addEventListener('click', function(e){
     }
 });
 
- 
 function resetPosition(object, positionX, positionY){
     object.x = positionX;
     object.y = positionY;
 }
 
-
+/*
+ * This function appends lives to LIVES_CONTAINER.
+ * It clears the container if some lives remainded from previous game attempt.
+ */
 function appendLivesToContainer(livesAmount){
     const fragment = document.createDocumentFragment();
     if(LIVES_CONTAINER.children.length){
-        clearNodes(LIVES_CONTAINER);
+        clearLivesContainer();
     }
     for (let i = 0; i < livesAmount; i++) {
         const img = document.createElement('img');
@@ -176,12 +190,39 @@ function appendLivesToContainer(livesAmount){
     LIVES_CONTAINER.appendChild(fragment);
 }
 
-function clearNodes(node){
-    while (node.firstChild) {
-        node.removeChild(node.lastChild);
+/*
+ * This function removes one live from the LIVES_CONTAINER.
+ */
+function removeLivesFromContainer(){
+    LIVES_CONTAINER.removeChild(LIVES_CONTAINER.lastChild);
+}
+
+/*
+ * This function removes all lives from the LIVES_CONTAINER.
+ */
+function clearLivesContainer(){
+    while (LIVES_CONTAINER.firstChild) {
+        LIVES_CONTAINER.removeChild(LIVES_CONTAINER.lastChild);
     }
 }
 
-function updateLivesContainer(){
-    LIVES_CONTAINER.removeChild(LIVES_CONTAINER.lastChild);
+function displayMessage(id, displayStyle){
+    document.getElementById(id).style.display = displayStyle;
+    //const fragment
 }
+
+const player = new Player();
+
+for(let i = 0; i < ENEMIES_AMOUNT; i++){
+    allEnemies.push(new Enemy(i+1));
+}
+
+/*
+<div id="win" class="win message">
+            <img src="images/bell.svg" class="message__border">
+            <h1 class="message__header">Congrats!</h1>
+            <p class="message__text">You've just successfully saved Xmas!</p>
+            <button id="reset" class="reset-btn">
+                <span class="reset-btn__box" id="reset">Play again!</span>
+            </button>
+        </div>*/

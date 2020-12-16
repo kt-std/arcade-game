@@ -2,44 +2,37 @@ const numRows = 6;
 const numCols = 7;
 const rowHeight = 70;
 const verticalStep = 70;
-const horizontalStep = 70;/*
-const initialPositionX = horizontalStep*Math.floor(numCols/2);
-const initialPositionY = 100*(numRows-2);
-*/
+const amountOfLives = 3;
+let allEnemies = [];
+const horizontalStep = 70;
 const initialPositionX = horizontalStep*Math.floor(numCols/2);
 const initialPositionY = (numRows-1)*verticalStep;
 const canvaStart = 0;
 const CANVAS_WIDTH = numCols*horizontalStep;
 const CANVAS_HEIGHT = numRows*horizontalStep+20;
+const heartPath = 'images/heart.png';
 
-// Enemies our player must avoid
+
 var Enemy = function(index) {
-    // Variables applied to each of our instances go here,
-    // we've provided one for you to get started
-
-    // The image/sprite for our enemies, this uses
-    // a helper we've provided to easily load images
     this.x = canvaStart;
     this.speed = Math.random()*100;
     this.y = verticalStep*(index);
     this.sprite = 'images/yeti.png';
 };
 
-// Update the enemy's position, required method for game
-// Parameter: dt, a time delta between ticks
+
 Enemy.prototype.update = function(dt) {
-    // You should multiply any movement by the dt parameter
-    // which will ensure the game runs at the same speed for
-    // all computers.
-    if (Math.abs(player.x - this.x) < horizontalStep/2 && Math.abs(player.y - this.y) < verticalStep/2) {
+    if(!haveLives(player.lives)){
         displayMessage('lose', 'flex');
     }else{
         this.speed += 0.01; 
-        this.x = this.checkPosition(this.x + dt*this.speed);
+        this.x = this.checkPosition(this.x + dt*this.speed); 
     }
-
 };
 
+var Lives = function(){
+    this.sprite = 'images/heart.png';
+}
 
 Enemy.prototype.checkPosition = function(position){
     return position > CANVAS_WIDTH + horizontalStep/2 
@@ -47,35 +40,41 @@ Enemy.prototype.checkPosition = function(position){
       : position;
 }
 
-// Draw the enemy on the screen, required method for game
+
 Enemy.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 };
 
 
-// Now write your own player class
-// This class requires an update(), render() and
-// a handleInput() method.
-
-// Player our player must avoid
 var Player = function() {
     this.y = initialPositionY;
     this.x = initialPositionX;
+    this.lives = new Array(amountOfLives);
     this.sprite = 'images/santa.png';
 };
 
-// Draw the enemy on the screen, required method for game
+
 Player.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 };
 
-Player.prototype.update = function(dt) {
+Player.prototype.update = function() {
+    allEnemies.forEach(enemy =>{
+        if (Math.abs(player.x - enemy.x) < horizontalStep/2 && 
+            Math.abs(player.y - enemy.y) < verticalStep/2) {
+
+            player.lives.pop();
+            updateLives(player.lives);
+            resetPosition(player, initialPositionX, initialPositionY);
+            console.log(player.lives);
+        }
+    });
    
 };
 
 
 Player.prototype.handleInput = function(key) {
-
+    console.log(this.lives);
     move(this, key);
     if(!this.y){
         displayMessage('win', 'flex');
@@ -88,15 +87,14 @@ Player.prototype.handleInput = function(key) {
     }else if(this.y < canvaStart){
         this.y = canvaStart;
     }
-    console.log(`x:${this.x} y:${this.y}`);
+    console.log(`x:${this.x} y:${this.y}`);  
+    
+    
 };
 
-var allEnemies = [];
-// Now instantiate your objects.
-// Place all enemy objects in an array called allEnemies
-// Place the player object in a variable called player
-for(var i = 1; i < 4; i++){
-    allEnemies.push(new Enemy(i));
+
+for(var i = 0; i < 3; i++){
+    allEnemies.push(new Enemy(i+1));
 }
 var player = new Player();
 
@@ -142,6 +140,7 @@ document.querySelector('body').addEventListener('click', function(e){
         displayMessage(e.target.offsetParent.id, 'none');
         
         resetPosition(player, initialPositionX, initialPositionY);
+        resetLives(player, amountOfLives);
         allEnemies.map((enemy,index) =>{
             resetPosition(enemy, canvaStart, verticalStep*(index+1));
             enemy.speed = Math.random()*100;
@@ -154,3 +153,27 @@ function resetPosition(object, positionX, positionY){
     object.x = positionX;
     object.y = positionY;
 }
+
+function haveLives(livesArray){
+    return livesArray.length;
+}
+
+
+function resetLives(obj, amountOfLives){
+    obj.lives = new Array(amountOfLives);
+}
+
+function updateLives(livesArray){
+    const fragment = document.createDocumentFragment();
+    const img = document.createElement('img');
+
+    for (var i = 0; i < livesArray.length; i++) {
+        img.src = heartPath;
+        img.style.height = '25px'; 
+        fragment.appendChild(img);
+    }
+    document.getElementById('hearts').appendChild(fragment);
+
+}
+
+updateLives(player.lives);
